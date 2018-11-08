@@ -126,3 +126,32 @@ task_context "VelocityEstimator" do
     runtime_states :MISSING_TRANSFORMATION
 
 end
+
+
+# The VelocityAggregator aims to aggregate the sensor's velocity in body-frame.
+# It doesn't do any filter, just remove nan.
+task_context "VelocityAggregator" do
+
+    # DVL's linear velocities samples
+    input_port("dvl_samples", "/base/samples/RigidBodyState")
+
+    # Orientation samples
+    input_port("orientation_samples", "/base/samples/RigidBodyState")
+
+    # IMU's angular velocities samples
+    input_port("imu_samples","/base/samples/IMUSensors")
+
+    output_port "velocity_samples", "/base/samples/RigidBodyState"
+    #*************************
+    #***  TRANSFORMATIONS  ***
+    #*************************
+
+    transformer do
+        transform "imu", "body"
+        transform "dvl", "body"
+        max_latency 0.05
+    end
+
+    runtime_states :MISSING_TRANSFORMATION
+    port_driven
+end
